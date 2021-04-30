@@ -20,7 +20,7 @@ environment(){
 
 	if [[ ! ${FOURKEYS_PROJECT} ]]
 	# If env.sh does not exist, use current active project
-	then FOURKEYS_PROJECT=$(gcloud config get-value project) 
+	then FOURKEYS_PROJECT=$(gcloud config get-value project)
 	fi
 }
 
@@ -54,8 +54,8 @@ build_deploy_cloud_run(){
 	echo "Creating ${nickname}-worker"
 	cp -R $DIR/../bq_workers/new_source_template $DIR/../bq_workers/${nickname}_parser
 	cd $DIR/../bq_workers/${nickname}_parser
-	gcloud builds submit --substitutions _SOURCE=${nickname},_REGION=us-central1 \
-						 --project ${FOURKEYS_PROJECT} . 
+	gcloud builds submit --substitutions _SOURCE=${nickname},_REGION=europe-west2 \
+						 --project ${FOURKEYS_PROJECT} .
 }
 
 set_permissions(){
@@ -69,7 +69,7 @@ set_permissions(){
 setup_pubsub_topic_subscription(){
 	# Get push endpoint for new service
 	export PUSH_ENDPOINT_URL=$(gcloud run --platform managed \
-	--region us-central1 services describe ${nickname}-worker \
+	--region europe-west2 services describe ${nickname}-worker \
 	--format="value(status.url)" --project ${FOURKEYS_PROJECT})
 
 	# Create topic
@@ -91,5 +91,3 @@ source_prompt
 build_deploy_cloud_run
 set_permissions
 setup_pubsub_topic_subscription
-
-
