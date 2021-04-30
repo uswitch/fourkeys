@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import hmac
-from hashlib import sha1
+from hashlib import sha1, sha256
 import os
 
 from google.cloud import secretmanager
@@ -64,6 +64,27 @@ def simple_token_verification(token, body):
     return secret.decode() == token
 
 
+def sha256_signature_verification(signature, body):
+    """
+    Verifies the signature using sha256
+    """
+
+    if not signature:
+        raise Exception("Signature is empty")
+
+    try:
+        # Get secret from Cloud Secret Manager
+        secret = get_secret(PROJECT_NAME, "event-handler", "latest")
+        # Compute the hashed signature
+        hashed = hmac.new(secret, body, sha256)
+        expected_signature = hashed.hexdigest()
+
+    except Exception as e:
+        print(e)
+
+    return hmac.compare_digest(signature, expected_signature)
+
+
 def get_secret(project_name, secret_name, version_num):
     """
     Returns secret payload from Cloud Secret Manager
@@ -106,5 +127,11 @@ AUTHORIZED_SOURCES = {
         ),
     "Tekton": EventSource(
         "tekton", "tekton-secret", simple_token_verification
+        ),
+    "golang-incident-bot": EventSource(
+        "incident-bot", "X-Incident-Signature", sha256_signature_verification
+        ),
+    "drone-deployment": EventSource(
+        "drone-deployment", "X-Deployment-Signature", sha256_signature_verification
         )
 }
