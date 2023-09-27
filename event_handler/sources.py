@@ -133,5 +133,8 @@ AUTHORIZED_SOURCES = {
         ),
     "drone-deployment": EventSource(
         "drone-deployment", "X-Deployment-Signature", sha256_signature_verification
+        ),
+    "github-deployment": EventSource(
+        "github-deployment", "X-Deployment-Signature", sha256_signature_verification
         )
 }
