@@ -91,9 +91,7 @@ def get_secret(project_name, secret_name, version_num):
     """
     try:
         client = secretmanager.SecretManagerServiceClient()
-        name = client.secret_version_path(
-            project_name, secret_name, version_num
-        )
+        name = client.secret_version_path(project_name, secret_name, version_num)
         secret = client.access_secret_version(name)
         return secret.payload.data
     except Exception as e:
@@ -119,22 +117,16 @@ def get_source(headers):
 
 
 AUTHORIZED_SOURCES = {
-    "GitHub-Hookshot": EventSource(
-        "github", "X-Hub-Signature", github_verification
-        ),
-    "Gitlab": EventSource(
-        "gitlab", "X-Gitlab-Token", simple_token_verification
-        ),
-    "Tekton": EventSource(
-        "tekton", "tekton-secret", simple_token_verification
-        ),
+    "GitHub-Hookshot": EventSource("github", "X-Hub-Signature", github_verification),
+    "Gitlab": EventSource("gitlab", "X-Gitlab-Token", simple_token_verification),
+    "Tekton": EventSource("tekton", "tekton-secret", simple_token_verification),
     "golang-incident-bot": EventSource(
         "incident-bot", "X-Incident-Signature", sha256_signature_verification
-        ),
+    ),
     "drone-deployment": EventSource(
         "drone-deployment", "X-Deployment-Signature", sha256_signature_verification
-        ),
-    "github-deployment": EventSource(
-        "github-deployment", "X-Deployment-Signature", sha256_signature_verification
-        )
+    ),
+    "actions-deployment": EventSource(
+        "actions-deployment", "X-Deployment-Signature", sha256_signature_verification
+    ),
 }

@@ -50,7 +50,7 @@ def index():
         if "headers" in attr:
             headers = json.loads(attr["headers"])
 
-            event = process_github_deployment_event(headers, msg)
+            event = process_actions_deployment_event(headers, msg)
 
         # [Do not edit below]
         shared.insert_row_into_bigquery(event)
@@ -67,7 +67,7 @@ def index():
     return "", 204
 
 
-def process_github_deployment_event(headers, msg):
+def process_actions_deployment_event(headers, msg):
     data = json.loads(base64.b64decode(msg["data"]).decode("utf-8").strip())
     metadata = data["metadata"]
 
