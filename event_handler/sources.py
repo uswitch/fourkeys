@@ -18,9 +18,6 @@ import os
 
 from google.cloud import secretmanager
 
-PROJECT_NAME = os.environ.get("PROJECT_NAME")
-
-
 class EventSource(object):
     """
     A source of event data being delivered to the webhook
@@ -41,8 +38,6 @@ def github_verification(signature, body):
 
     expected_signature = "sha1="
     try:
-        # Get secret from Cloud Secret Manager
-        secret = get_secret(PROJECT_NAME, "event-handler", "latest")
         # Compute the hashed signature
         hashed = hmac.new(secret, body, sha1)
         expected_signature += hashed.hexdigest()
@@ -74,7 +69,6 @@ def sha256_signature_verification(signature, body):
 
     try:
         # Get secret from Cloud Secret Manager
-        secret = get_secret(PROJECT_NAME, "event-handler", "latest")
         # Compute the hashed signature
         hashed = hmac.new(secret, body, sha256)
         expected_signature = hashed.hexdigest()
@@ -92,11 +86,14 @@ def get_secret(project_name, secret_name, version_num):
     try:
         client = secretmanager.SecretManagerServiceClient()
         name = client.secret_version_path(project_name, secret_name, version_num)
-        secret = client.access_secret_version(name)
+        request = secretmanager.AccessSecretVersionRequest(name=name)
+        secret = client.access_secret_version(request=request)
         return secret.payload.data
     except Exception as e:
         print(e)
 
+PROJECT_NAME = os.environ.get("PROJECT_NAME")
+secret = get_secret(PROJECT_NAME, "event-handler", "latest")
 
 def get_source(headers):
     """
@@ -126,7 +123,7 @@ AUTHORIZED_SOURCES = {
     "drone-deployment": EventSource(
         "drone-deployment", "X-Deployment-Signature", sha256_signature_verification
     ),
-    "actions-deployment": EventSource(
-        "actions-deployment", "X-Deployment-Signature", sha256_signature_verification
+    "airship-deploy-action": EventSource(
+        "airship-deploy-action", "X-Deployment-Signature", sha256_signature_verification
     ),
 }

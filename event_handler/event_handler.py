@@ -24,7 +24,7 @@ import sources
 PROJECT_NAME = os.environ.get("PROJECT_NAME")
 
 app = Flask(__name__)
-
+publisher = pubsub_v1.PublisherClient()
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -67,7 +67,6 @@ def publish_to_pubsub(source, msg, headers):
     Publishes the message to Cloud Pub/Sub
     """
     try:
-        publisher = pubsub_v1.PublisherClient()
         topic_path = publisher.topic_path(PROJECT_NAME, source)
         print(topic_path)
 
